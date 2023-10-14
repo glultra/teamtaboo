@@ -17,3 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Game routes.
+Route::post('create-new-game',[\App\Http\Controllers\Api\V1\CreateNewGame::class, 'store']);
+Route::get('is-url-exist/{url}',[\App\Http\Controllers\Api\V1\CreateNewGame::class, 'show']);
