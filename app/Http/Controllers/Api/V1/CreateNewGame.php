@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Game;
+use App\Models\GuestUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -26,10 +27,11 @@ class CreateNewGame extends Controller
         do {
             $gameUrl = Str::random(8);
         } while (Game::where('url', $gameUrl)->exists());
-
+        $token = session()->get('_token');
         $game = Game::create([
             'url' => $gameUrl,
-            'hosted_by' => $request->username
+            'hosted_by' => $request->username,
+            'host_token' => $token
         ]);
 
         return response([

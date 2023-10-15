@@ -9,24 +9,22 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('games', function (Blueprint $table) {
+        Schema::create('guest_users', function (Blueprint $table) {
             $table->id();
-            $table->string('url')->unique();
-            $table->string('hosted_by');
-            $table->string('host_token');
-
-
+            $table->string('token')->unique(); // Unique token for each guest user
+            // Add more fields as needed for guest user data
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('games');
+        Schema::dropIfExists('guest_users');
     }
 };

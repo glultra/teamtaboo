@@ -12,5 +12,6 @@ class Game extends Model
     protected $fillable = [
         'url',
         'hosted_by',
+        'host_token'
     ];
 }

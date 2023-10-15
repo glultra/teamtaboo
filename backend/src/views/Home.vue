@@ -52,6 +52,7 @@ export default {
   },
   methods: {
     createNewGame() {
+
       api.post('create-new-game', {
         username: this.username
       }).then(response => {

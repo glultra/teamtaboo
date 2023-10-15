@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'guest' => [
+            'driver' => 'session',
+            'provider' => 'guests', // Use a custom provider for guest users
+        ],
     ],
 
     /*
@@ -69,6 +73,10 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+        'guests' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\GuestUser::class, // Your Guest User model
+        ],
     ],
 
     /*

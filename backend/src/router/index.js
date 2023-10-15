@@ -1,5 +1,6 @@
 // Composables
 import { createRouter, createWebHistory } from 'vue-router'
+import {useGuestUserStore} from "@/store/guestUser";
 
 const routes = [
   {
@@ -26,6 +27,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
-})
+});
+
+router.beforeEach((to, from, next) => {
+  // Check if the token is set in the Pinia store and restore it
+  const guestUserStore = useGuestUserStore();
+  if (!guestUserStore.token) {
+    // Retrieve the token from local storage or another source
+    const token = localStorage.getItem('guestUserToken');
+    guestUserStore.setToken(token);
+  }
+
+  next();
+});
 
 export default router

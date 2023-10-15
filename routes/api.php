@@ -21,3 +21,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Game routes.
 Route::post('create-new-game',[\App\Http\Controllers\Api\V1\CreateNewGame::class, 'store']);
 Route::get('is-url-exist/{url}',[\App\Http\Controllers\Api\V1\CreateNewGame::class, 'show']);
+Route::get('/guest-user',[\App\Http\Controllers\Api\V1\GuestController::class, 'index']);
+Route::post('/store-guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'store']);
+
