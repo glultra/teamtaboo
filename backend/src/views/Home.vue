@@ -60,7 +60,7 @@ export default {
         token: useGuestUserStore().token,
       }).then(response => {
         const gameUrl = response.data.url;
-        usePlayerInGameStore().setPlayerInGame(response.data.player_in_game);
+        usePlayerInGameStore().setPlayerInGame(JSON.stringify(response.data.player_in_game));
         // Redirect to new game URL.
         router.push({
           name: 'Game',

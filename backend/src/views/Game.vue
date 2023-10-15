@@ -1,4 +1,5 @@
 <template>
+  {{isPlayerInGame}}
   <v-snackbar timeout="1700" v-model="snackbar" :color="snackbarColor">
     {{ snackbarMessage }}
     <template v-slot:action="{ attrs }">
@@ -32,8 +33,8 @@
                 <v-col> <!-- Added d-flex justify-center -->
                   <v-btn color="black" @click="copyGameUrl" class="w-100"> Copy link</v-btn>
                 </v-col>
-                <v-col v-if="isOwner()" > <!-- Added d-flex justify-center -->
-                  <v-btn color="green" @click="startGame"  class="w-100"> Start game</v-btn>
+                <v-col v-if="isOwner()"> <!-- Added d-flex justify-center -->
+                  <v-btn color="green" @click="startGame" class="w-100"> Start game</v-btn>
                 </v-col>
               </v-row>
               <v-row v-else class="d-flex flex-row">
@@ -45,7 +46,10 @@
                 <v-col>
                   <v-sheet>PLAYERS JOINED SO FAR</v-sheet>
                   <v-list>
-                    <v-list-item> <v-icon icon="mdi-wifi"></v-icon> {{ game.hosted_by }}</v-list-item>
+                    <v-list-item>
+                      <v-icon icon="mdi-wifi"></v-icon>
+                      {{ game.hosted_by }}
+                    </v-list-item>
                   </v-list>
                 </v-col>
               </v-row>
@@ -65,6 +69,7 @@
 import {defineComponent} from 'vue'
 import api from "@/service";
 import {useGuestUserStore} from "@/store/guestUser";
+import {usePlayerInGameStore} from "@/store/playerInGame";
 
 export default defineComponent({
   data() {
@@ -76,7 +81,7 @@ export default defineComponent({
       player_in_game: null,
       isJoined: false,
       isLoading: true, // Initialize loading state
-      gameUrl: 'http://localhost:3000'+ this.$route.href,
+      gameUrl: 'http://localhost:3000' + this.$route.href,
       snackbar: false,
       snackbarMessage: '',
       snackbarColor: '', // Customize the snackbar color as needed (e.g., 'success', 'error', etc.)
@@ -84,15 +89,26 @@ export default defineComponent({
 
     };
   },
-  computed() {
+  computed: {
     // State Management Logics.
+    game_id(){
 
+    },
+    isPlayerInGame() {
+
+    }
   },
   created() {
     // Get to know smth.
     api.get('is-url-exist/' + this.url).then(response => {
       console.log(response);
       this.game = response.data.game;
+      console.log(this.game.id);
+      const playerInGame = JSON.parse(usePlayerInGameStore().playerInGame);
+      if(playerInGame.game_id == this.game.id){
+        this.isJoined = true;
+      }
+
       this.isOkay = true;
       this.isLoading = false; // Set loading state to false when data is loaded
 
@@ -105,7 +121,6 @@ export default defineComponent({
     });
 
 
-
   },
   mounted() {
     // Game detail.
@@ -115,7 +130,7 @@ export default defineComponent({
     startGame() {
 
     },
-    copyGameUrl(){
+    copyGameUrl() {
       const input = document.createElement('input');
       input.value = this.gameUrl;
       document.body.appendChild(input);
@@ -131,10 +146,10 @@ export default defineComponent({
       this.showSnackbar('URL copied to clipboard');
 
     },
-    isOwner(){
-      if(this.game.host_token == this.guestUserToken){
+    isOwner() {
+      if (this.game.host_token == this.guestUserToken) {
         return true;
-      }else{
+      } else {
         return false;
       }
     },
@@ -143,8 +158,17 @@ export default defineComponent({
       this.snackbarColor = color;
       this.snackbar = true;
     },
-    joinTheGame(){
-      this.isJoined = true;
+    joinTheGame() {
+      api.post('join-game', {
+        game: this.game,
+        token: useGuestUserStore().token,
+      }).then(response => {
+        this.isJoined = true;
+        usePlayerInGameStore().setPlayerInGame(JSON.stringify(response.data.player_in_game));
+
+      }).catch(error => {
+        console.log(error);
+      });
     },
 
   }
