@@ -23,4 +23,9 @@ Route::post('create-new-game',[\App\Http\Controllers\Api\V1\CreateNewGame::class
 Route::get('is-url-exist/{url}',[\App\Http\Controllers\Api\V1\CreateNewGame::class, 'show']);
 Route::get('/guest-user',[\App\Http\Controllers\Api\V1\GuestController::class, 'index']);
 Route::post('/store-guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'store']);
+Route::post('/player-in-game/{host_token}', function(Request $request) {
+    $host_token = $request->host_token;
+    $game = \App\Models\Game::where(['host_token' => $host_token])->get();
+    return $game;
+});
 

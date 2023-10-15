@@ -63,6 +63,7 @@ class GuestController extends Controller
             }
         }
 
+
         return response()->json([
             'message' => 'Guest user token retrieved or created.',
             'token' => $guestToken,

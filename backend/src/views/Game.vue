@@ -22,18 +22,23 @@
             <v-col class="pa-10">
               <h2 class="font-weight-bold text-center mb-10"><span
                 class="bg-green rounded pl-1 pr-1 ">{{ game.hosted_by }}</span> is hosting the game. </h2>
-              <v-row class="d-flex flex-row">
+              <v-row v-if="isJoined" class="d-flex flex-row">
                 <v-col cols="12">
                   <v-sheet class="mb-1">Game link</v-sheet>
                   <v-sheet class="border rounded pa-1 bg-grey-lighten-5 cursor">
                     {{ gameUrl }}
                   </v-sheet>
                 </v-col>
-                <v-col > <!-- Added d-flex justify-center -->
+                <v-col> <!-- Added d-flex justify-center -->
                   <v-btn color="black" @click="copyGameUrl" class="w-100"> Copy link</v-btn>
                 </v-col>
-                <v-col > <!-- Added d-flex justify-center -->
-                  <v-btn color="green" @click="startGame" class="w-100"> Start game</v-btn>
+                <v-col v-if="isOwner()" > <!-- Added d-flex justify-center -->
+                  <v-btn color="green" @click="startGame"  class="w-100"> Start game</v-btn>
+                </v-col>
+              </v-row>
+              <v-row v-else class="d-flex flex-row">
+                <v-col>
+                  <v-btn color="amber" @click="joinTheGame()" class="w-100"> JOIN GAME</v-btn>
                 </v-col>
               </v-row>
               <v-row class="d-flex flex-row">
@@ -53,11 +58,13 @@
       </v-row>
     </v-card>
   </v-container>
+
 </template>
 
 <script>
 import {defineComponent} from 'vue'
 import api from "@/service";
+import {useGuestUserStore} from "@/store/guestUser";
 
 export default defineComponent({
   data() {
@@ -66,11 +73,14 @@ export default defineComponent({
       is404: false,
       isOkay: false,
       game: null,
+      player_in_game: null,
+      isJoined: false,
       isLoading: true, // Initialize loading state
       gameUrl: 'http://localhost:3000'+ this.$route.href,
       snackbar: false,
       snackbarMessage: '',
       snackbarColor: '', // Customize the snackbar color as needed (e.g., 'success', 'error', etc.)
+      guestUserToken: useGuestUserStore().token,
 
     };
   },
@@ -87,11 +97,15 @@ export default defineComponent({
       this.isLoading = false; // Set loading state to false when data is loaded
 
     }).catch(err => {
+      console.log(err);
       this.is404 = true;
       this.isOkay = false;
       this.isLoading = false; // Set loading state to false on error
-
+      this.isJoined = false;
     });
+
+
+
   },
   mounted() {
     // Game detail.
@@ -117,12 +131,21 @@ export default defineComponent({
       this.showSnackbar('URL copied to clipboard');
 
     },
+    isOwner(){
+      if(this.game.host_token == this.guestUserToken){
+        return true;
+      }else{
+        return false;
+      }
+    },
     showSnackbar(message, color = 'success') {
       this.snackbarMessage = message;
       this.snackbarColor = color;
       this.snackbar = true;
     },
-
+    joinTheGame(){
+      this.isJoined = true;
+    },
 
   }
 })

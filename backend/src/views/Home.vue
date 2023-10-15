@@ -41,6 +41,8 @@
 <script>
 import api from "@/service";
 import router from "@/router";
+import {useGuestUserStore} from "@/store/guestUser";
+import {usePlayerInGameStore} from "@/store/playerInGame";
 
 export default {
   data() {
@@ -54,9 +56,11 @@ export default {
     createNewGame() {
 
       api.post('create-new-game', {
-        username: this.username
+        username: this.username,
+        token: useGuestUserStore().token,
       }).then(response => {
         const gameUrl = response.data.url;
+        usePlayerInGameStore().setPlayerInGame(response.data.player_in_game);
         // Redirect to new game URL.
         router.push({
           name: 'Game',
