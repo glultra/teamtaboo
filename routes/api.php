@@ -23,20 +23,6 @@ Route::post('create-new-game', [\App\Http\Controllers\Api\V1\CreateNewGame::clas
 Route::get('is-url-exist/{url}', [\App\Http\Controllers\Api\V1\CreateNewGame::class, 'show']);
 Route::get('/guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'index']);
 Route::post('/store-guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'store']);
-Route::post('/player-in-game/{host_token}', function (Request $request) {
-    $host_token = $request->host_token;
-    $game = \App\Models\Game::where(['host_token' => $host_token])->get();
-    return $game;
-});
-Route::post('/join-game', function (Request $request) {
-    $player = \App\Models\GuestUser::where(['token' => $request->token])->first();
-    $game = \App\Models\Game::where($request->game)->first();
-    $player_in_game = \App\Models\PlayerInGame::create([
-        'player_id' => $player->id,
-        'game_id' => $game->id
-    ]);
-    return response([
-        'player_in_game' => $player_in_game,
-    ]);
-});
+Route::get('/player-in-game-status',[\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'playerInGameStatus']) ;
+Route::post('/join-game', [\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'store']);
 

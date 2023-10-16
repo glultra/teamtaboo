@@ -16,6 +16,7 @@ export default {
     };
   },
   mounted() {
+
     const guestUserStore = useGuestUserStore();
     // Make an API call to check the user's status
     api

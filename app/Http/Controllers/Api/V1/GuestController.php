@@ -10,25 +10,6 @@ use App\Models\GuestUser;
 
 class GuestController extends Controller
 {
-//    public function index(Request $request)
-//    {
-//        $guestUser = GuestUser::where('token', $request->bearerToken())->first();
-//
-//        if ($guestUser) {
-//            // Retrieve and return data associated with the guest user identified by the token
-//            return response()->json([
-//                'message' => 'Guest user data retrieved.',
-//                'guest_user_id' => $guestUser->id,
-//                'token' => $guestUser->token, // Return the token
-//                'data' => [], // Return guest user data here
-//            ]);
-//        }
-//
-//        return response()->json([
-//            'message' => 'Guest user not found.',
-//        ], 404);
-//    }
-
     public function store(Request $request)
     {
         // Check if the guest token is already stored in the session

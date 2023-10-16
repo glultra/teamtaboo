@@ -1,5 +1,4 @@
 <template>
-  {{isPlayerInGame}}
   <v-snackbar timeout="1700" v-model="snackbar" :color="snackbarColor">
     {{ snackbarMessage }}
     <template v-slot:action="{ attrs }">
@@ -7,7 +6,13 @@
     </template>
   </v-snackbar>
   <v-container v-if="is404">
-    <v-row class="d-flex flex-row justify-center h-screen align-center">
+    <v-row class="d-flex flex-row justify-center h-screen align-center" v-if="!guestUserToken">
+      <v-col>
+        <v-btn color="amber" @click="reloadPage" class="w-100"> New teamtaboo member!</v-btn>
+      </v-col>
+    </v-row>
+
+    <v-row class="d-flex flex-row justify-center h-screen align-center" v-else>
       <v-col cols="12"><h1 class="text-center text-red-accent-2">404 The game url is not exist.</h1></v-col>
     </v-row>
   </v-container>
@@ -38,17 +43,28 @@
                 </v-col>
               </v-row>
               <v-row v-else class="d-flex flex-row">
-                <v-col>
-                  <v-btn color="amber" @click="joinTheGame()" class="w-100"> JOIN GAME</v-btn>
-                </v-col>
+                <v-form @submit.prevent="joinTheGame()">
+                  <v-col cols="12">
+                    <v-text-field
+                      :counter="10"
+                      label="JOIN AS"
+                      required
+                      v-model="joined_as"
+                      style="width: 300px;"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col>
+                    <v-btn color="amber" type="submit" class="w-100"> JOIN GAME</v-btn>
+                  </v-col>
+                </v-form>
               </v-row>
               <v-row class="d-flex flex-row">
                 <v-col>
                   <v-sheet>PLAYERS JOINED SO FAR</v-sheet>
                   <v-list>
-                    <v-list-item>
+                    <v-list-item v-for="playerInGame in players_in_game">
                       <v-icon icon="mdi-wifi"></v-icon>
-                      {{ game.hosted_by }}
+                      {{ playerInGame.joined_as }}
                     </v-list-item>
                   </v-list>
                 </v-col>
@@ -70,6 +86,7 @@ import {defineComponent} from 'vue'
 import api from "@/service";
 import {useGuestUserStore} from "@/store/guestUser";
 import {usePlayerInGameStore} from "@/store/playerInGame";
+import {usePlayersInGameStore} from "@/store/playersInGame";
 
 export default defineComponent({
   data() {
@@ -78,7 +95,8 @@ export default defineComponent({
       is404: false,
       isOkay: false,
       game: null,
-      player_in_game: null,
+      player_in_game: usePlayerInGameStore().playerInGame,
+      players_in_game: usePlayersInGameStore().playersInGame,
       isJoined: false,
       isLoading: true, // Initialize loading state
       gameUrl: 'http://localhost:3000' + this.$route.href,
@@ -86,34 +104,32 @@ export default defineComponent({
       snackbarMessage: '',
       snackbarColor: '', // Customize the snackbar color as needed (e.g., 'success', 'error', etc.)
       guestUserToken: useGuestUserStore().token,
+      joined_as: 'guest',
 
     };
   },
   computed: {
     // State Management Logics.
-    game_id(){
-
-    },
-    isPlayerInGame() {
-
-    }
   },
   created() {
     // Get to know smth.
-    api.get('is-url-exist/' + this.url).then(response => {
-      console.log(response);
-      this.game = response.data.game;
-      console.log(this.game.id);
-      const playerInGame = JSON.parse(usePlayerInGameStore().playerInGame);
-      if(playerInGame.game_id == this.game.id){
-        this.isJoined = true;
-      }
 
+    api.get('player-in-game-status', {
+      params: {
+        token: this.guestUserToken,
+        game_url: this.url,
+      }
+    }).then(response => {
+      this.player_in_game = response.data.player_in_game;
+      this.players_in_game = response.data.players_in_game;
+      usePlayerInGameStore().setPlayerInGame(JSON.stringify(this.player_in_game));
+      usePlayersInGameStore().setPlayersInGame(JSON.stringify(this.players_in_game));
+      this.isJoined = response.data.status;
+      this.game = response.data.game;
       this.isOkay = true;
       this.isLoading = false; // Set loading state to false when data is loaded
 
-    }).catch(err => {
-      console.log(err);
+    }).catch(error => {
       this.is404 = true;
       this.isOkay = false;
       this.isLoading = false; // Set loading state to false on error
@@ -162,6 +178,7 @@ export default defineComponent({
       api.post('join-game', {
         game: this.game,
         token: useGuestUserStore().token,
+        name: this.joined_as,
       }).then(response => {
         this.isJoined = true;
         usePlayerInGameStore().setPlayerInGame(JSON.stringify(response.data.player_in_game));
@@ -170,6 +187,11 @@ export default defineComponent({
         console.log(error);
       });
     },
+    reloadPage() {
+      // Reload the current page without a full refresh
+      window.location.reload();
+    }
+
 
   }
 })

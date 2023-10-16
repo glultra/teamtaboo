@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('game_id');
             $table->unsignedBigInteger('player_id');
+            $table->string('joined_as')->default('guest');
             $table->integer('position')->default(8); // Add the position column
             $table->integer('score')->nullable(); // If you want to store player scores
             $table->timestamps();

@@ -12,7 +12,8 @@ class PlayerInGame extends Model
 
     protected $fillable = [
         'game_id',
-        'player_id'
+        'player_id',
+        'joined_as'
     ];
 
     public function game()
