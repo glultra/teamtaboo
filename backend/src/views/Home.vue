@@ -27,8 +27,8 @@
               </v-form>
 
             </v-col>
-            <v-col class="bg-grey-lighten-1 align-center justify-center d-flex">
-              <v-icon icon="$vuetify" size="128"></v-icon>
+            <v-col class="bg-teal-accent-4 align-center justify-center d-flex">
+              <v-icon icon="$vuetify"  size="128"></v-icon>
             </v-col>
           </v-row>
         </v-container>

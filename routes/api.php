@@ -26,3 +26,9 @@ Route::post('/store-guest-user', [\App\Http\Controllers\Api\V1\GuestController::
 Route::get('/player-in-game-status',[\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'playerInGameStatus']) ;
 Route::post('/join-game', [\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'store']);
 
+Route::get('/games', [\App\Http\Controllers\YadController::class, 'index']);
+Route::put('/update-game`', [\App\Http\Controllers\YadController::class, 'updateGame']);
+Route::get('/test', function(){
+    event(new \App\Events\ExampleEvent('halaw'));
+    return 'bra leray ?';
+});

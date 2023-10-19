@@ -1,4 +1,5 @@
 <template>
+  <v-btn @click="test()">Click me</v-btn>
   <router-view>
   </router-view>
 </template>
@@ -7,6 +8,8 @@
 import api from "@/service";
 import axios from "axios";
 import {useGuestUserStore} from "@/store/guestUser";
+import pusher from "@/channels/pusher";
+import subscribeToChannel from "@/channels/subscribeToChannel";
 
 export default {
   data() {
@@ -16,6 +19,14 @@ export default {
     };
   },
   mounted() {
+    // Enable pusher logging - don't include this in production
+    // Add broadcaster here ...
+    Pusher.logToConsole = true;
+    const myChannel = subscribeToChannel('my-channel', 'my-event', (data) => {
+      console.log('Custom event received:', data);
+      // Handle the custom event data here
+    });
+
 
     const guestUserStore = useGuestUserStore();
     // Make an API call to check the user's status
@@ -35,7 +46,13 @@ export default {
         console.log("Error Status: ", error2);
       });
   },
-
+  methods:{
+    test(){
+      api.get('/test').then(resp => {
+        console.log(resp.data);
+      });
+    }
+  }
 
 }
 </script>
