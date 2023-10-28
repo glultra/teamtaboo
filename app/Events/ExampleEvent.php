@@ -17,18 +17,20 @@ class ExampleEvent implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public $data;
-    public function __construct($data)
+    public $message;
+    public function __construct($message)
     {
-        $this->data = $data;
+        //
+        $this->message = $message;
     }
+
 
     public function broadcastOn()
     {
-        return new PrivateChannel('channel-name');
+        return new PrivateChannel('game');
     }
 
     public function broadcastAs(){
-        return 'my-event';
+        return 'event-name';
     }
 }

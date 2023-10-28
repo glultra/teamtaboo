@@ -28,7 +28,7 @@ Route::post('/join-game', [\App\Http\Controllers\Api\V1\PlayerInGameController::
 
 Route::get('/games', [\App\Http\Controllers\YadController::class, 'index']);
 Route::put('/update-game`', [\App\Http\Controllers\YadController::class, 'updateGame']);
-Route::get('/test', function(){
+Route::get('/test', function(Request $request){
     event(new \App\Events\ExampleEvent('halaw'));
-    return 'bra leray ?';
+    return $request->user();
 });

@@ -83,7 +83,6 @@
 
 <script>
 import {defineComponent} from 'vue'
-import api from "@/service";
 import {useGuestUserStore} from "@/store/guestUser";
 import {usePlayerInGameStore} from "@/store/playerInGame";
 import {usePlayersInGameStore} from "@/store/playersInGame";
@@ -114,7 +113,7 @@ export default defineComponent({
   created() {
     // Get to know smth.
 
-    api.get('player-in-game-status', {
+    window.axios.get('/api/player-in-game-status', {
       params: {
         token: this.guestUserToken,
         game_url: this.url,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -12,42 +13,35 @@ class GuestController extends Controller
 {
     public function store(Request $request)
     {
-        // Check if the guest token is already stored in the session
-        if (Session::has('guestToken')) {
-            $guestToken = $request->session()->get('guestToken');
+        //
+        if($request->user() || $request->user || $request->token){
+            return response([
+                'message' => 'user already signed in.',
+                'user' => $request->user() ?? $request->user,
+                'token' => $request->token,
+            ]);
         }
-        else {
-            // If the guest token is not in the session, check if it's provided in the request
-            $token = $request->input('token') ?: $request->bearerToken();
+        // Create new user.
+        return $this->register($request);
+    }
 
-            if ($token) {
-                // If a token is provided, check if it exists in the database
-                $existingGuestUser = GuestUser::where('token', $token)->first();
-                if ($existingGuestUser) {
-                    // If it exists, store it in the session
-                    $guestToken = $existingGuestUser->token;
-                    $request->session()->put('guestToken', $guestToken);
-                    \session()->save();
-                } else {
-                    // If it doesn't exist, generate a new token and store it in the database and session
-                    $guestToken = Str::random(32);
-                    $guestUser = GuestUser::create(['token' => $guestToken]);
-                    $request->session()->put('guestToken', $guestToken);
-                    \session()->save();
-                }
-            } else {
-                // If no token is provided, generate a new token and store it in the database and session
-                $guestToken = Str::random(32);
-                $guestUser = GuestUser::create(['token' => $guestToken]);
-                $request->session()->put('guestToken', $guestToken);
-                \session()->save();
-            }
-        }
+    public function register(Request $request)
+    {
+        $user = User::create([
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => 'admin', // password
+            'remember_token' => Str::random(10),
+        ]);
 
+        // Create a Sanctum token for the user
+        $token = $user->createToken('Api token of ' . $user->remember_token);
 
         return response()->json([
-            'message' => 'Guest user token retrieved or created.',
-            'token' => $guestToken,
+            'message' => 'Random user created.',
+            'user' => $user,
+            'token' => $token->plainTextToken,
         ]);
     }
 }

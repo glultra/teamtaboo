@@ -39,7 +39,6 @@
 </template>
 
 <script>
-import api from "@/service";
 import router from "@/router";
 import {useGuestUserStore} from "@/store/guestUser";
 import {usePlayerInGameStore} from "@/store/playerInGame";
@@ -55,7 +54,7 @@ export default {
   methods: {
     createNewGame() {
 
-      api.post('create-new-game', {
+      window.axios.post('/api/create-new-game', {
         username: this.username,
         token: useGuestUserStore().token,
       }).then(response => {

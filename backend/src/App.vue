@@ -5,11 +5,8 @@
 </template>
 
 <script>
-import api from "@/service";
 import axios from "axios";
 import {useGuestUserStore} from "@/store/guestUser";
-import pusher from "@/channels/pusher";
-import subscribeToChannel from "@/channels/subscribeToChannel";
 
 export default {
   data() {
@@ -21,34 +18,35 @@ export default {
   mounted() {
     // Enable pusher logging - don't include this in production
     // Add broadcaster here ...
-    Pusher.logToConsole = true;
-    const myChannel = subscribeToChannel('my-channel', 'my-event', (data) => {
-      console.log('Custom event received:', data);
-      // Handle the custom event data here
-    });
-
+    window.Echo.private(`game`)
+      .listen('.event-name', (event) => {
+        console.log(event);
+      });
 
     const guestUserStore = useGuestUserStore();
     // Make an API call to check the user's status
-    api
-      .post("/store-guest-user", {token: guestUserStore.token})
-      .then((response) => {
-        const token =response.data.token;
-        // After token retrieval or creation
-        // When making API requests
-        const guestUserToken = guestUserStore.token;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${guestUserToken}`;
+    window.axios.get('/sanctum/csrf-cookie').then(resp2 => {
+      window.axios
+        .post("/api/store-guest-user", {token: guestUserStore.token})
+        .then((response) => {
+          const token =response.data.token;
+          // After token retrieval or creation
+          // When making API requests
+          const guestUserToken = guestUserStore.token;
+          window.axios.defaults.headers.common['Authorization'] = `Bearer ${guestUserToken}`;
 
-        guestUserStore.setToken(token);
-        console.log(response.data);
-      })
-      .catch((error2) => {
-        console.log("Error Status: ", error2);
-      });
+          guestUserStore.setToken(token);
+          console.log(response.data);
+        })
+        .catch((error2) => {
+          console.log("Error Status: ", error2);
+        });
+    });
+
   },
   methods:{
     test(){
-      api.get('/test').then(resp => {
+      window.axios.get('/api/test').then(resp => {
         console.log(resp.data);
       });
     }
