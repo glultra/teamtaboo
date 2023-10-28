@@ -51,6 +51,9 @@ export default {
       message: 'Failed',
     }
   },
+  mounted() {
+
+  },
   methods: {
     createNewGame() {
 

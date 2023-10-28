@@ -17,11 +17,11 @@ class PlayerJoinedGameEvent implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public $message;
-    public function __construct($message)
+    public $game;
+    public function __construct($game)
     {
         //
-        $this->message = $message;
+        $this->game = $game;
     }
 
     /**
@@ -31,7 +31,7 @@ class PlayerJoinedGameEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('games');
+        return new PrivateChannel('game.'.$this->game->url);
     }
     public function broadcastAs()
     {

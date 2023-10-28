@@ -14,20 +14,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// private routes
+Route::middleware('auth:sanctum')->group(function (){
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::post('create-new-game', [\App\Http\Controllers\Api\V1\CreateNewGame::class, 'store']);
+    Route::get('is-url-exist/{url}', [\App\Http\Controllers\Api\V1\CreateNewGame::class, 'show']);
+    Route::get('/guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'index']);
+    Route::get('/player-in-game-status',[\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'playerInGameStatus']) ;
+    Route::post('/join-game', [\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'store']);
 });
 
-// Game routes.
-Route::post('create-new-game', [\App\Http\Controllers\Api\V1\CreateNewGame::class, 'store']);
-Route::get('is-url-exist/{url}', [\App\Http\Controllers\Api\V1\CreateNewGame::class, 'show']);
-Route::get('/guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'index']);
+// public routes
 Route::post('/store-guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'store']);
-Route::get('/player-in-game-status',[\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'playerInGameStatus']) ;
-Route::post('/join-game', [\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'store']);
 
-Route::get('/games', [\App\Http\Controllers\YadController::class, 'index']);
-Route::put('/update-game`', [\App\Http\Controllers\YadController::class, 'updateGame']);
 Route::get('/test', function(Request $request){
     event(new \App\Events\ExampleEvent('halaw'));
     return $request->user();

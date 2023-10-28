@@ -1,4 +1,6 @@
 <template>
+  <div class="mt-10">
+  </div>
   <v-snackbar timeout="1700" v-model="snackbar" :color="snackbarColor">
     {{ snackbarMessage }}
     <template v-slot:action="{ attrs }">
@@ -110,39 +112,45 @@ export default defineComponent({
   computed: {
     // State Management Logics.
   },
-  created() {
-    // Get to know smth.
-
-    window.axios.get('/api/player-in-game-status', {
-      params: {
-        token: this.guestUserToken,
-        game_url: this.url,
-      }
-    }).then(response => {
-      this.player_in_game = response.data.player_in_game;
-      this.players_in_game = response.data.players_in_game;
-      usePlayerInGameStore().setPlayerInGame(JSON.stringify(this.player_in_game));
-      usePlayersInGameStore().setPlayersInGame(JSON.stringify(this.players_in_game));
-      this.isJoined = response.data.status;
-      this.game = response.data.game;
-      this.isOkay = true;
-      this.isLoading = false; // Set loading state to false when data is loaded
-
-    }).catch(error => {
-      this.is404 = true;
-      this.isOkay = false;
-      this.isLoading = false; // Set loading state to false on error
-      this.isJoined = false;
-    });
-
-
-  },
   mounted() {
-    // Game detail.
+    // Get to know smth.
+    // broadcasted.
+    window.Echo.private(`game.${this.url}`)
+      .listen('.joined.game', (event) => {
+        this.fetchPlayersInGame();
+      });
+
+    this.fetchPlayersInGame();
 
   },
   methods: {
     startGame() {
+
+    },
+    fetchPlayersInGame() {
+      window.axios.get('/api/player-in-game-status', {
+        params: {
+          token: this.guestUserToken,
+          game_url: this.url,
+        }
+      }).then(response => {
+        console.log(response);
+        this.player_in_game = response.data.player_in_game;
+        this.players_in_game = response.data.players_in_game;
+        usePlayerInGameStore().setPlayerInGame(JSON.stringify(this.player_in_game));
+        usePlayersInGameStore().setPlayersInGame(JSON.stringify(this.players_in_game));
+        this.isJoined = response.data.status;
+        this.game = response.data.game;
+        this.isOkay = true;
+        this.isLoading = false; // Set loading state to false when data is loaded
+
+      }).catch(error => {
+        console.log(error);
+        this.is404 = true;
+        this.isOkay = false;
+        this.isLoading = false; // Set loading state to false on error
+        this.isJoined = false;
+      });
 
     },
     copyGameUrl() {
@@ -174,7 +182,7 @@ export default defineComponent({
       this.snackbar = true;
     },
     joinTheGame() {
-      api.post('join-game', {
+      window.axios.post('/api/join-game', {
         game: this.game,
         token: useGuestUserStore().token,
         name: this.joined_as,

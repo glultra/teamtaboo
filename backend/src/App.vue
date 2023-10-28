@@ -15,18 +15,19 @@ export default {
       userName: '',
     };
   },
-  mounted() {
+  async mounted() {
     // Enable pusher logging - don't include this in production
     // Add broadcaster here ...
-    window.Echo.private(`game`)
-      .listen('.event-name', (event) => {
-        console.log(event);
-      });
+    // window.Echo.private(`game`)
+    //   .listen('.event-name', (event) => {
+    //     console.log(event);
+    //   });
 
     const guestUserStore = useGuestUserStore();
     // Make an API call to check the user's status
-    window.axios.get('/sanctum/csrf-cookie').then(resp2 => {
-      window.axios
+
+    await window.axios.get('/sanctum/csrf-cookie').then(async (resp2)=> {
+      await window.axios
         .post("/api/store-guest-user", {token: guestUserStore.token})
         .then((response) => {
           const token =response.data.token;
@@ -34,6 +35,7 @@ export default {
           // When making API requests
           const guestUserToken = guestUserStore.token;
           window.axios.defaults.headers.common['Authorization'] = `Bearer ${guestUserToken}`;
+          axios.defaults.headers.common['Authorization'] = `Bearer ${guestUserToken}`;
 
           guestUserStore.setToken(token);
           console.log(response.data);
@@ -46,7 +48,7 @@ export default {
   },
   methods:{
     test(){
-      window.axios.get('/api/test').then(resp => {
+      window.axios.get('/api/user').then(resp => {
         console.log(resp.data);
       });
     }

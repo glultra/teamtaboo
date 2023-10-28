@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Game;
 use App\Models\GuestUser;
 use App\Models\PlayerInGame;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -41,7 +42,7 @@ class CreateNewGame extends Controller
         $gameID = $game->id; // Retrieve the game's ID
 
         // Retrieve the player using the token
-        $player = GuestUser::where(['token' => $token])->first();
+        $player = $request->user();
 
         // Create a new player in the game
         $playerInGame = PlayerInGame::create([

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\PlayerJoinedGameEvent;
 use App\Http\Controllers\Controller;
 use App\Models\PlayerInGame;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PlayerInGameController extends Controller
@@ -29,13 +31,16 @@ class PlayerInGameController extends Controller
      */
     public function store(Request $request)
     {
-        $player = \App\Models\GuestUser::where(['token' => $request->token])->first();
+        $player = $request->user();
         $game = \App\Models\Game::where($request->game)->first();
         $player_in_game = \App\Models\PlayerInGame::create([
             'player_id' => $player->id,
             'game_id' => $game->id,
             'joined_as' => $request->name,
         ]);
+
+        event(new PlayerJoinedGameEvent($game));
+
         return response([
             'player_in_game' => $player_in_game,
         ]);
@@ -54,7 +59,7 @@ class PlayerInGameController extends Controller
     public function playerInGameStatus(Request $request)
     {
         //
-        $player = \App\Models\GuestUser::where(['token' =>$request->token])->first();
+        $player = $request->user();
         $game = \App\Models\Game::where(['url' => $request->game_url])->first();
         $playerInGame = \App\Models\PlayerInGame::where(['player_id' => $player->id])->where(['game_id' => $game->id])->first();
         $playersInGame = PlayerInGame::where(['game_id' => $game->id])->get();
