@@ -1,36 +1,23 @@
 <template>
-  <div class="mt-10">
-  </div>
-  <v-snackbar timeout="1700" v-model="snackbar" :color="snackbarColor">
-    {{ snackbarMessage }}
-    <template v-slot:action="{ attrs }">
-      <v-btn color="pink" text v-bind="attrs" @click="snackbar = false">Close</v-btn>
-    </template>
-  </v-snackbar>
-  <v-container v-if="is404">
-    <v-row class="d-flex flex-row justify-center h-screen align-center" v-if="!guestUserToken">
-      <v-col>
-        <v-btn color="amber" @click="reloadPage" class="w-100"> New teamtaboo member!</v-btn>
-      </v-col>
-    </v-row>
-
-    <v-row class="d-flex flex-row justify-center h-screen align-center" v-else>
-      <v-col cols="12"><h1 class="text-center text-red-accent-2">404 The game url is not exist.</h1></v-col>
-    </v-row>
-  </v-container>
-  <v-row class="d-flex flex-row justify-center h-screen align-center" v-else-if="isLoading">
+    <v-snackbar timeout="1700" v-model="snackbar" :color="snackbarColor">
+      {{ snackbarMessage }}
+      <template v-slot:action="{ attrs }">
+        <v-btn color="pink" text v-bind="attplayerInGameStorers" @click="snackbar = false">Close</v-btn>
+      </template>
+    </v-snackbar>
+  <v-row class="d-flex flex-row justify-center h-screen align-center" v-if="gameStore.loading">
     <!-- Display a loading spinner or message here -->
     <v-progress-circular indeterminate color="red"></v-progress-circular>
   </v-row>
-  <v-container class="d-flex justify-center align-center h-screen" v-if="game && isOkay">
+  <v-container class="d-flex justify-center align-center h-screen" v-else>
     <v-card class="mt-2 elevation-7 rounded" style="max-width: 600px;">
       <v-row class="d-flex justify-center">
         <v-container>
           <v-row class="d-flex flex-row">
             <v-col class="pa-10">
               <h2 class="font-weight-bold text-center mb-10"><span
-                class="bg-green rounded pl-1 pr-1 ">{{ game.hosted_by }}</span> is hosting the game. </h2>
-              <v-row v-if="isJoined" class="d-flex flex-row">
+                class="bg-green rounded pl-1 pr-1 ">{{ gameStore.game.hosted_by }}</span> is hosting the game. </h2>
+              <v-row v-if="gameStore.isJoined" class="d-flex flex-row">
                 <v-col cols="12">
                   <v-sheet class="mb-1">Game link</v-sheet>
                   <v-sheet class="border rounded pa-1 bg-grey-lighten-5 cursor">
@@ -64,7 +51,7 @@
                 <v-col>
                   <v-sheet>PLAYERS JOINED SO FAR</v-sheet>
                   <v-list>
-                    <v-list-item v-for="playerInGame in players_in_game">
+                    <v-list-item v-for="playerInGame in JSON.parse(playersInGameStore.playersInGame)">
                       <v-icon icon="mdi-wifi"></v-icon>
                       {{ playerInGame.joined_as }}
                     </v-list-item>
@@ -84,73 +71,52 @@
 </template>
 
 <script>
-import {defineComponent} from 'vue'
+import {defineComponent, ref} from 'vue'
 import {useGuestUserStore} from "@/store/guestUser";
 import {usePlayerInGameStore} from "@/store/playerInGame";
 import {usePlayersInGameStore} from "@/store/playersInGame";
+import {useRoute} from "vue-router";
+import {useGameStore} from "@/store/gameStore";
 
 export default defineComponent({
-  data() {
-    return {
-      url: this.$route.params.url,
-      is404: false,
-      isOkay: false,
-      game: null,
-      player_in_game: usePlayerInGameStore().playerInGame,
-      players_in_game: usePlayersInGameStore().playersInGame,
-      isJoined: false,
-      isLoading: true, // Initialize loading state
-      gameUrl: 'http://localhost:3000' + this.$route.href,
-      snackbar: false,
-      snackbarMessage: '',
-      snackbarColor: '', // Customize the snackbar color as needed (e.g., 'success', 'error', etc.)
-      guestUserToken: useGuestUserStore().token,
-      joined_as: 'guest',
 
-    };
-  },
-  computed: {
-    // State Management Logics.
-  },
-  mounted() {
-    // Get to know smth.
+  setup() {
+    const route = useRoute();
+    const gameStore = useGameStore();
+
+    const url = route.params.url;
+    const joined_as = ref('');
+    const gameUrl = ('http://localhost:3000' + route.fullPath);
+    const guestUserStore= useGuestUserStore();
+    const playerInGameStore = usePlayerInGameStore();
+    const playersInGameStore = usePlayersInGameStore();
+    const snackbarMessage = ref('');
+    const snackbarColor = ref('success');
+    const snackbar = ref(false);
+    gameStore.fetchGameDetails(url);
     // broadcasted.
-    window.Echo.private(`game.${this.url}`)
+    window.Echo.private(`game.${url}`)
       .listen('.joined.game', (event) => {
-        this.fetchPlayersInGame();
+        gameStore.fetchPlayersInGame(url);
       });
 
-    this.fetchPlayersInGame();
+
+
+    return {
+      guestUserStore,
+      gameStore,
+      gameUrl,
+      snackbarMessage,
+      snackbarColor,
+      snackbar,
+      joined_as,
+      playerInGameStore,
+      playersInGameStore
+    };
 
   },
   methods: {
     startGame() {
-
-    },
-    fetchPlayersInGame() {
-      window.axios.get('/api/player-in-game-status', {
-        params: {
-          token: this.guestUserToken,
-          game_url: this.url,
-        }
-      }).then(response => {
-        console.log(response);
-        this.player_in_game = response.data.player_in_game;
-        this.players_in_game = response.data.players_in_game;
-        usePlayerInGameStore().setPlayerInGame(JSON.stringify(this.player_in_game));
-        usePlayersInGameStore().setPlayersInGame(JSON.stringify(this.players_in_game));
-        this.isJoined = response.data.status;
-        this.game = response.data.game;
-        this.isOkay = true;
-        this.isLoading = false; // Set loading state to false when data is loaded
-
-      }).catch(error => {
-        console.log(error);
-        this.is404 = true;
-        this.isOkay = false;
-        this.isLoading = false; // Set loading state to false on error
-        this.isJoined = false;
-      });
 
     },
     copyGameUrl() {
@@ -170,7 +136,7 @@ export default defineComponent({
 
     },
     isOwner() {
-      if (this.game.host_token == this.guestUserToken) {
+      if (this.gameStore.game.host_token == this.guestUserStore.token) {
         return true;
       } else {
         return false;
@@ -184,10 +150,10 @@ export default defineComponent({
     joinTheGame() {
       window.axios.post('/api/join-game', {
         game: this.game,
-        token: useGuestUserStore().token,
         name: this.joined_as,
       }).then(response => {
-        this.isJoined = true;
+        console.log(response);
+        this.gameStore.isJoined = true;
         usePlayerInGameStore().setPlayerInGame(JSON.stringify(response.data.player_in_game));
 
       }).catch(error => {

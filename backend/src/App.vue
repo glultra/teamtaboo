@@ -1,5 +1,5 @@
 <template>
-  <v-btn @click="test()">Click me</v-btn>
+<!--  <v-btn @click="test()">Click me</v-btn>-->
   <router-view>
   </router-view>
 </template>
@@ -7,15 +7,11 @@
 <script>
 import axios from "axios";
 import {useGuestUserStore} from "@/store/guestUser";
+import {ref} from "vue";
 
 export default {
-  data() {
-    return {
-      userIsAuthenticated: false,
-      userName: '',
-    };
-  },
-  async mounted() {
+
+  setup() {
     // Enable pusher logging - don't include this in production
     // Add broadcaster here ...
     // window.Echo.private(`game`)
@@ -23,28 +19,18 @@ export default {
     //     console.log(event);
     //   });
 
+    const userIsAuthenticated =  ref(false);
+    const userName = ref('');
     const guestUserStore = useGuestUserStore();
+    guestUserStore.getAuthUser();
     // Make an API call to check the user's status
 
-    await window.axios.get('/sanctum/csrf-cookie').then(async (resp2)=> {
-      await window.axios
-        .post("/api/store-guest-user", {token: guestUserStore.token})
-        .then((response) => {
-          const token =response.data.token;
-          // After token retrieval or creation
-          // When making API requests
-          const guestUserToken = guestUserStore.token;
-          window.axios.defaults.headers.common['Authorization'] = `Bearer ${guestUserToken}`;
-          axios.defaults.headers.common['Authorization'] = `Bearer ${guestUserToken}`;
 
-          guestUserStore.setToken(token);
-          console.log(response.data);
-        })
-        .catch((error2) => {
-          console.log("Error Status: ", error2);
-        });
-    });
-
+    return {
+      userIsAuthenticated,
+      userName,
+      guestUserStore,
+    };
   },
   methods:{
     test(){

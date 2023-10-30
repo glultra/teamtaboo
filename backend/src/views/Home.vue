@@ -1,6 +1,10 @@
 <template>
   <!--  <v-parallax src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg">-->
-  <v-container class="d-flex justify-center align-center h-screen">
+  <v-row class="d-flex flex-row justify-center h-screen align-center" v-if="guestUserStore.loading">
+    <!-- Display a loading spinner or message here -->
+    <v-progress-circular indeterminate color="red"></v-progress-circular>
+  </v-row>
+  <v-container class="d-flex justify-center align-center h-screen" v-else>
     <v-card class="mt-2 elevation-7 rounded" style="max-width: 600px;">
       <v-row class="d-flex justify-center">
         <v-container>
@@ -42,17 +46,20 @@
 import router from "@/router";
 import {useGuestUserStore} from "@/store/guestUser";
 import {usePlayerInGameStore} from "@/store/playerInGame";
+import {ref} from "vue";
 
 export default {
-  data() {
-    return {
-      snackbar: false,
-      username: 'Guest',
-      message: 'Failed',
-    }
-  },
-  mounted() {
 
+  setup(){
+    const guestUserStore = useGuestUserStore();
+    const username = ref('Guest');
+    const message = ref('Failed');
+
+    return {
+      username,
+      message,
+      guestUserStore
+    }
   },
   methods: {
     createNewGame() {
