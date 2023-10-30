@@ -13,16 +13,17 @@ class GuestController extends Controller
 {
     public function store(Request $request)
     {
-        //
-        if($request->user() || $request->user || $request->token){
-            return response([
-                'message' => 'user already signed in.',
-                'user' => $request->user() ?? $request->user,
-                'token' => $request->token,
-            ]);
-        }
         // Create new user.
+//        if($request->token == null){
         return $this->register($request);
+//        }
+//        else{
+//            return response([
+//                'message' => 'user already signed in.',
+//                'user' => $request->user() ?? $request->user,
+//                'token' => $request->token,
+//            ]);
+//        }
     }
 
     public function register(Request $request)

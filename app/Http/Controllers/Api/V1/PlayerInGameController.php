@@ -60,7 +60,7 @@ class PlayerInGameController extends Controller
     {
         //
         $player = $request->user();
-        $game = \App\Models\Game::where(['url' => $request->game_url])->first();
+        $game = \App\Models\Game::where(['url' => $request->code])->first();
         $playerInGame = \App\Models\PlayerInGame::where(['player_id' => $player->id])->where(['game_id' => $game->id])->first();
         $playersInGame = PlayerInGame::where(['game_id' => $game->id])->get();
         return response([

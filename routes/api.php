@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::post('create-new-game', [\App\Http\Controllers\Api\V1\CreateNewGame::class, 'store']);
     Route::get('is-url-exist/{url}', [\App\Http\Controllers\Api\V1\CreateNewGame::class, 'show']);
     Route::get('/guest-user', [\App\Http\Controllers\Api\V1\GuestController::class, 'index']);
-    Route::get('/player-in-game-status',[\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'playerInGameStatus']) ;
+    Route::get('/player-in-game-status/{code}',[\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'playerInGameStatus']) ;
     Route::post('/join-game', [\App\Http\Controllers\Api\V1\PlayerInGameController::class, 'store']);
 });
 
